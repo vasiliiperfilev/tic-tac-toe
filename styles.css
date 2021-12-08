@@ -1,0 +1,29 @@
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+.body{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.gameBoard {
+    height: 450px;
+    width: 450px;
+    display: flex;
+    flex-wrap: wrap;
+    border: 1px solid black;
+}
+
+.gridCell {
+    border: 1px solid black;
+    width: 33.3333%;
+    height: 33.3333%;
+    font-size: 50px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
