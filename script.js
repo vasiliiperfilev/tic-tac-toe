@@ -3,13 +3,9 @@ const Player = (name, symbol) => {
     return {name, symbol, positionsList};
 };
 
-const player1 = Player("player1", "X");
-const player2 = Player("player2", "O");
-
 const gameBoard = ((gameBoardContainer) => {
 
     const createNewBoard = () => {
-        gameBoardContainer.innerHTML = "";
         for (let i = 0; i < 9; i++){
             let cell = document.createElement("div");
             cell['boardIndex'] = i;
@@ -18,25 +14,31 @@ const gameBoard = ((gameBoardContainer) => {
         }
     }
 
-    const resetGame = () => {
-        createNewBoard();
-        player1.positionsList = [];
-        player2.positionsList = [];
-    }
+    // const resetGame = () => {
+    //     gameBoardContainer.innerHTML = "";
+    //     createNewBoard();
+    //     player1.positionsList = [];
+    //     player2.positionsList = [];
+    // }
 
     return {
         gameBoardContainer,
-        resetGame,
-        player1,
-        player2,
+        createNewBoard,
     }
 })(document.querySelector(".gameBoard"));
 
-const displayController = ((gameBoard) => {
-    let activePlayer = gameBoard.player1;
+const gameController = (() => {
+
+    const player1 = Player("player1", "X");
+    const player2 = Player("player2", "O");
+    let activePlayer = player1;
 
     const switchActivePlayer = () => {
-        activePlayer = (activePlayer === gameBoard.player1) ? gameBoard.player2 : gameBoard.player1;
+        activePlayer = (activePlayer === player1) ? player2 : player1;
+    }
+
+    const getActivePlayer = () => {
+        return activePlayer
     }
 
     const checkIfWin = (player, lastPosition) => {
@@ -45,16 +47,22 @@ const displayController = ((gameBoard) => {
         let diagonalMatch = 0;
 
         player.positionsList.forEach(position => {
-            if (Math.floor(position / 3) === Math.floor(lastPosition / 3)) rowMatch++;
-            if (position % 3 === lastPosition % 3) columnMatch++;
-            if ((position % 2 === lastPosition % 2) && !(Math.floor(position / 3) === Math.floor(lastPosition / 3))) diagonalMatch++;
+            if (Math.floor(position / 3) === Math.floor(lastPosition / 3)) {
+                rowMatch++;
+            }
+            else if (position % 3 === lastPosition % 3) {
+                columnMatch++;
+            }
+            else if ((position % 2 === 0) && (lastPosition % 2 === 0)){
+                diagonalMatch++; 
+            }
         })
-        console.log({rowMatch, columnMatch, diagonalMatch})
-        if (rowMatch === 3 || columnMatch === 3 || diagonalMatch === 3){
+        console.log({rowMatch, columnMatch, diagonalMatch});
+        if (rowMatch === 2 || columnMatch === 2 || diagonalMatch === 2){
             console.log(`${player.name} won`);
             return true;
         }
-        else if (gameBoard.player1.positionsList.length === 5)
+        else if (player.positionsList.length === 4)
         {
             console.log(`draw`);
             return true;
@@ -64,16 +72,40 @@ const displayController = ((gameBoard) => {
         }
     }
 
+    const resetGame = () => {
+        gameBoard.gameBoardContainer.innerHTML = "";
+        gameBoard.createNewBoard();
+        player1.positionsList = [];
+        player2.positionsList = [];
+        activePlayer = player1;
+    }
+
+    return {
+        player1, 
+        player2,
+        getActivePlayer,
+        checkIfWin,
+        resetGame,
+        switchActivePlayer
+    }
+})();
+
+// const player1 = Player("player1", "X");
+// const player2 = Player("player2", "O");
+
+const displayController = (() => {
+
     const drawSymbol = (e) => {
+        activePlayer = gameController.getActivePlayer()
         if (e.target.textContent === ""){
             e.target.textContent = activePlayer.symbol;
-            activePlayer.positionsList.push(e.target.boardIndex);
-            if (checkIfWin(activePlayer, e.target.boardIndex)){
-                setTimeout(gameBoard.resetGame, 5000)
+            if (gameController.checkIfWin(activePlayer, e.target.boardIndex)){
+                setTimeout(gameController.resetGame, 5000);
             }
             else 
             {
-                switchActivePlayer();
+                activePlayer.positionsList.push(e.target.boardIndex);
+                gameController.switchActivePlayer();
             }
         }
     }
@@ -83,6 +115,6 @@ const displayController = ((gameBoard) => {
     return {
         drawSymbol,
     }
-})(gameBoard);
+})();
 
-gameBoard.resetGame();
+gameController.resetGame();
