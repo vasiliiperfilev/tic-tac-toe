@@ -14,13 +14,6 @@ const gameBoard = ((gameBoardContainer) => {
         }
     }
 
-    // const resetGame = () => {
-    //     gameBoardContainer.innerHTML = "";
-    //     createNewBoard();
-    //     player1.positionsList = [];
-    //     player2.positionsList = [];
-    // }
-
     return {
         gameBoardContainer,
         createNewBoard,
@@ -89,9 +82,6 @@ const gameController = (() => {
         switchActivePlayer
     }
 })();
-
-// const player1 = Player("player1", "X");
-// const player2 = Player("player2", "O");
 
 const displayController = (() => {
 

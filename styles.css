@@ -1,29 +1,117 @@
+:root {
+    --background-color: #f0dcb2;
+    --font-color: #A3423C;
+    --header-background-color: #781D42;
+    --header-font-color: #DE834D;
+    --field-background-color: #F0D290;
+    --field-background-color-hover: #f1cb77;
+    --border-color: #A3423C;
+    --header-border-color: #4d1229;
+    --button-background-color: #dabd81;
+    --button-hover-background: rgb(235, 198, 121);
+    --button-active-background: rgb(235, 192, 100);
+    --font: 'Varela Round', sans-serif;
+}
+
 * {
     box-sizing: border-box;
     margin: 0;
     padding: 0;
+    font-family: var(--font);
 }
 
-.body{
+.header {
+    width: 100%;
+    font-size: 48px;
+    text-align: center;
+    background-color: var(--header-background-color);
+    color: var(--header-font-color);
+    border-bottom: 5px solid var(--header-border-color);
+}
+
+body{
     display: flex;
+    flex-direction: column;
     justify-content: center;
     align-items: center;
+    background-color: var(--background-color);
+    color: var(--font-color);
+    font-size: 24px;
+}
+
+.infoLabel {
+    padding: 20px;
+}
+
+.main {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    flex: 1;
 }
 
 .gameBoard {
-    height: 450px;
-    width: 450px;
+    height: 454px;
+    width: 454px;
     display: flex;
+    justify-content: center;
+    align-items: center;
     flex-wrap: wrap;
-    border: 1px solid black;
+    border: 2px solid var(--border-color);
+    border-collapse: collapse;
 }
 
 .gridCell {
-    border: 1px solid black;
-    width: 33.3333%;
-    height: 33.3333%;
+    border: 1px solid var(--border-color);
+    width: 150px;
+    height: 150px;
     font-size: 50px;
     display: flex;
     justify-content: center;
     align-items: center;
+    background-color: var(--field-background-color);
+}
+
+.gameBoard:nth-child(3n) {
+    width: 100%;
+}
+
+.gridCell:hover {
+    background-color: var(--field-background-color-hover);
+}
+
+.restartBtn {
+    margin: 20px;
+    padding: 10px;
+    font-size: 24px;
+    background-color: var(--button-background-color);
+    border-radius: 5px;
+}
+
+.restartBtn:hover {
+    background-color: var(--button-hover-background);
+    cursor: pointer;
+}
+
+.restartBtn:active {
+    background-color: var(--button-active-background);
+}
+
+.footer {
+    text-align: center;
+    font-size: 0.8em;
+}
+
+.footer img {
+    height: 24px;
+    width: auto;
+    transition: 0.5s;
+}
+
+.footer img:hover {
+    height: 24px;
+    width: auto;
+    transform: scale(1.2) rotate(360deg);
+    cursor: pointer;
 }
