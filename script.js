@@ -36,7 +36,7 @@ const gameBoard = ((gameBoardContainer) => {
 
 const gameController = ((restartBtn) => {
 
-    const player1 = Player("Player 1", "X", false);
+    const player1 = Player("Player", "X", false);
     const player2 = Player("AI", "O", true);
     let activePlayer = player1;
     let isInputActive = true;

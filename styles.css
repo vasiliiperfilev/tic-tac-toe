@@ -115,3 +115,16 @@ body{
     transform: scale(1.2) rotate(360deg);
     cursor: pointer;
 }
+
+@media screen and (max-width: 450px) {
+    .gameBoard {
+        height: 304px;
+        width: 304px;
+    }
+
+    .gridCell {
+        height: 100px;
+        width: 100px;
+    }
+
+}
