@@ -1,9 +1,10 @@
-const Player = (name, symbol) => {
+const Player = (name, symbol, isAI) => {
     let positionsList = [];
     return {
         name,
         symbol,
-        positionsList
+        positionsList,
+        isAI
     };
 };
 
@@ -18,36 +19,45 @@ const gameBoard = ((gameBoardContainer) => {
         }
     }
 
+    const findCell = index => {
+        let cell;
+        Array.from(gameBoardContainer.children).forEach(child => {
+            if (child.boardIndex == index) cell = child;
+        })
+        return cell
+    }
+
     return {
         gameBoardContainer,
         createNewBoard,
+        findCell
     }
 })(document.querySelector(".gameBoard"));
 
 const gameController = ((restartBtn) => {
 
-    const player1 = Player("Player 1", "X");
-    const player2 = Player("Player 2", "O");
+    const player1 = Player("Player 1", "X", false);
+    const player2 = Player("AI", "O", true);
     let activePlayer = player1;
+    let isInputActive = true;
 
     const switchActivePlayer = () => {
         activePlayer = (activePlayer === player1) ? player2 : player1;
-    }
-
-    const getActivePlayer = () => {
-        return activePlayer
+        displayController.changeInfoLabel(activePlayer, false);
+        if (activePlayer.isAI) {
+            isInputActive = false;
+            setTimeout(aiMakeMove, 300);
+            setTimeout(() => isInputActive = true, 500);
+        }
     }
 
     const checkIfWin = (positionsList) => {
         let rowMatch = 0;
         let columnMatch = 0;
         let diagonalMatch = 0;
-        let lastPosition = positionsList[positionsList.length - 1]
-        let positionsWithoutLast = positionsList.slice(0, -1)
 
-        //positionsWithoutLast.forEach(position => {
-        for (let i = 0; i < positionsList.length; i++){
-            for (let j = i + 1; j < positionsList.length; j++){
+        for (let i = 0; i < positionsList.length; i++) {
+            for (let j = i + 1; j < positionsList.length; j++) {
                 let position = positionsList[i];
                 let lastPosition = positionsList[j];
                 if (Math.floor(position / 3) === Math.floor(lastPosition / 3)) {
@@ -58,23 +68,13 @@ const gameController = ((restartBtn) => {
                     diagonalMatch++;
                 }
             }
-            // if (Math.floor(position / 3) === Math.floor(lastPosition / 3)) {
-            //     rowMatch++;
-            // } else if (position % 3 === lastPosition % 3) {
-            //     columnMatch++;
-            // } else if ((position % 2 === 0) && (lastPosition % 2 === 0)) {
-            //     diagonalMatch++;
-            // }
-        }//)
-        //console.log({rowMatch, columnMatch, diagonalMatch});
+        }
 
         if (rowMatch === 3 || columnMatch === 3 || diagonalMatch >= 3) {
-            //won
             return "win";
         } else if (positionsList.length === 5) {
-            //draw
             return "draw";
-        } {
+        } else {
             return false;
         }
     }
@@ -117,7 +117,6 @@ const gameController = ((restartBtn) => {
             currentState.freePositionsList.forEach(position => {
                 let newState = createNewState(currentState, position, false)
                 value = Math.max(value, scoreMove(newState, depth - 1, false));
-                //console.log(newState.p1Positions, newState.p2Positions, value);
             })
             return value;
         } else {
@@ -125,7 +124,6 @@ const gameController = ((restartBtn) => {
             currentState.freePositionsList.forEach(position => {
                 let newState = createNewState(currentState, position, true)
                 value = Math.min(value, scoreMove(newState, depth - 1, true));
-                //console.log(newState.p1Positions, newState.p2Positions, value);
             })
             return value;
         }
@@ -140,7 +138,35 @@ const gameController = ((restartBtn) => {
             moveScores[position] = value;
         })
 
-        console.log(moveScores);
+        const move = Object.keys(moveScores).reduce((a, b) => moveScores[a] > moveScores[b] ? a : b);
+        return move;
+    }
+
+    const playerMakeMove = e => {
+        if (isInputActive && e.target.textContent === "") {
+            let target = e.target;
+            activePlayer.positionsList.push(e.target.boardIndex);
+            displayController.drawSymbol(target, activePlayer.symbol);
+            checkMoveResult();
+        }
+    }
+
+    const aiMakeMove = () => {
+        let move = chooseMove(currentState());
+        activePlayer.positionsList.push(move);
+        let target = gameBoard.findCell(move);
+        displayController.drawSymbol(target, activePlayer.symbol);
+        checkMoveResult();
+    }
+
+    const checkMoveResult = () => {
+        result = checkIfWin(activePlayer.positionsList);
+        if (result) {
+            displayController.setActive(false);
+            displayController.changeInfoLabel(activePlayer, result);
+        } else {
+            switchActivePlayer();
+        }
     }
 
     const resetGame = () => {
@@ -150,49 +176,28 @@ const gameController = ((restartBtn) => {
         player2.positionsList = [];
         activePlayer = player1;
         displayController.setActive(true);
-        displayController.changeInfoLabel(activePlayer);
+        displayController.changeInfoLabel(activePlayer, false);
     }
 
     restartBtn.addEventListener('click', resetGame);
+    gameBoard.gameBoardContainer.addEventListener("click", playerMakeMove);
 
     return {
-        getActivePlayer,
-        checkIfWin,
         resetGame,
-        switchActivePlayer,
-        currentState,
-        chooseMove,
     }
 })(document.querySelector(".restartBtn"));
 
 const displayController = ((infoLabel) => {
 
     let active = true;
-    let result = false;
 
-    const drawSymbol = (e) => {
+    const drawSymbol = (target, symbol) => {
         if (active) {
-            activePlayer = gameController.getActivePlayer()
-            if (e.target.textContent === "") {
-                e.target.textContent = activePlayer.symbol;
-                activePlayer.positionsList.push(e.target.boardIndex);
-                result = gameController.checkIfWin(activePlayer.positionsList);
-                if (result) {
-                    active = false;
-                } else {
-                    gameController.switchActivePlayer();
-                }
-                changeInfoLabel(gameController.getActivePlayer());
-                
-                if (activePlayer.name == "Player 1"){
-                    let currentState = gameController.currentState()
-                    gameController.chooseMove(currentState);
-                }
-            }
+            target.textContent = symbol;
         }
     }
 
-    const changeInfoLabel = (activePlayer) => {
+    const changeInfoLabel = (activePlayer, result) => {
         if (result === false) infoLabel.textContent = `${activePlayer.name} turn`;
         if (result === "win") infoLabel.textContent = `${activePlayer.name} won!`;
         if (result === "draw") infoLabel.textContent = `Draw!`;
@@ -200,10 +205,7 @@ const displayController = ((infoLabel) => {
 
     const setActive = (bool) => {
         active = bool;
-        result = !bool;
     }
-
-    gameBoard.gameBoardContainer.addEventListener("click", drawSymbol);
 
     return {
         setActive,
